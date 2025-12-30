@@ -2,8 +2,9 @@
 storage/*
 .idea/*
 datasets/*
-**/data/*
+!datasets/*.tar.gz
 !datasets/.gitkeep
+**/data/*
 **/__pycache__/*
 **/storage/*
 **/outputs/*
