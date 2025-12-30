@@ -1,0 +1,28 @@
+[project]
+name = "sigmetrics26-dataset"
+version = "1.0.0"
+description = "Dataset and scripts for SIGMETRICS '26 paper: Exploring the 5G Digital Divide in the Non-Contiguous US"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "contourpy>=1.3.0",
+    "cycler>=0.12.0",
+    "fonttools>=4.61.0",
+    "kiwisolver>=1.4.0",
+    "matplotlib>=3.10.0",
+    "numpy>=2.0.0",
+    "packaging>=25.0",
+    "pandas>=2.3.0",
+    "pillow>=12.0.0",
+    "pyparsing>=3.3.0",
+    "python-dateutil>=2.9.0",
+    "pytz>=2025.2",
+    "tzdata>=2025.3",
+]
+
+[project.urls]
+Repository = "https://github.com/NUWiNS/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

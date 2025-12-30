@@ -17,6 +17,17 @@ In this repository, we release the dataset and scripts used in the SIGMETRICS '2
 
 ---
 
+## Prerequisites
+
+Python: >= 3.12
+
+Install the required Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+---
+
 ## Data Access
 
 The dataset files are stored using **Git LFS** (Large File Storage). After cloning the repository, use the following command to download the large dataset files:
@@ -29,9 +40,10 @@ cd sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-sat
 # Download large files tracked by Git LFS
 git lfs pull
 
-# Unzip the compressed tar file
-# Files will be placed in datasets/
-tar -xzvf processed_data.tar.gz
+# Unzip all compressed tar files
+tar -xzvf alaska_road_test_202406.processed.tar.gz
+tar -xzvf hawaii_road_test_202408.processed.tar.gz
+tar -xzvf la_to_omaha_road_test_202411.processed.tar.gz
 ```
 
 If you don't have Git LFS installed:
@@ -44,15 +56,6 @@ sudo apt-get install git-lfs
 
 # Initialize Git LFS
 git lfs install
-```
-
----
-
-## Prerequisites
-
-Install the required Python dependencies:
-```bash
-pip install -r requirements.txt
 ```
 
 ---
@@ -82,6 +85,17 @@ pip install -r requirements.txt
     - `fig16_starlink_cell_network_kpis_with_areas_in_non_contiguous/` — Starlink vs Cellular by area
     - `fig17_delta_tput_between_operators/` — Throughput delta between operators
     - `tab1_concurrent_outage/` — Analysis of concurrent outage between operators (Table 1)
+
+---
+
+## Plotting
+
+```
+cd scripts/plotting
+
+# Output will be placed locally in the folder
+python <fig-folder-name>/main.py
+```
 
 ---
 
