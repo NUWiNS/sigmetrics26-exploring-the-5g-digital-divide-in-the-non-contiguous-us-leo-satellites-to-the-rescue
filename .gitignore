@@ -1,0 +1,15 @@
+.DS_Store
+storage/*
+.idea/*
+datasets/*
+**/data/*
+!datasets/.gitkeep
+**/__pycache__/*
+**/storage/*
+**/outputs/*
+**/accounting/*
+.venv/*
+**/logs/*
+**/backup/*
+**/csv/*
+shared_scripts/*/data/*
