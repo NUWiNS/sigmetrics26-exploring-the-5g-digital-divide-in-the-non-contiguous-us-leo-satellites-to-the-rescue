@@ -192,10 +192,10 @@ if 1:
     
     for path in ['hawaii_path', 'alaska_path']:
         if path == 'hawaii_path':
-            path = '/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/raw_data/hawaii_ta_data/'
+            path = '../raw_data/hawaii_ta_data/'
             op_list = ['ATT', 'VERIZON', 'TMOBILE']
         else:
-            path = '/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/raw_data/alaska_ta_data/'
+            path = '../raw_data/alaska_ta_data/'
             op_list = ['ATT', 'VERIZON']
 
         # Initialize data structures for each area type
@@ -371,13 +371,13 @@ if 1:
         print(f"Saving data for {area} areas...")
         
         # Save distance data
-        dist_filename = f'/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/hawaii_alaska_ta_dist_dict_{area}.pkl'
+        dist_filename = f'../processed_files/hawaii_alaska_ta_dist_dict_{area}.pkl'
         with open(dist_filename, 'wb') as fh:
             pkl.dump(hawaii_alaska_ta_dist_dict_by_area[area], fh)
         print(f"Saved: {dist_filename}")
         
         # Save RSRP-distance data
-        rsrp_filename = f'/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/hawaii_alaska_rsrp_distance_dict_{area}.pkl'
+        rsrp_filename = f'../processed_files/hawaii_alaska_rsrp_distance_dict_{area}.pkl'
         with open(rsrp_filename, 'wb') as fh:
             pkl.dump(hawaii_alaska_rsrp_distance_dict_by_area[area], fh)
         print(f"Saved: {rsrp_filename}")
@@ -396,8 +396,8 @@ if 1:
     }
     
     # Save combined files
-    with open('/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/hawaii_alaska_ta_dist_dict_all_areas.pkl', 'wb') as fh:
+    with open('../processed_files/hawaii_alaska_ta_dist_dict_all_areas.pkl', 'wb') as fh:
         pkl.dump(combined_ta_dict, fh)
     
-    with open('/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/hawaii_alaska_rsrp_distance_dict_all_areas.pkl', 'wb') as fh:
+    with open('../processed_files/hawaii_alaska_rsrp_distance_dict_all_areas.pkl', 'wb') as fh:
         pkl.dump(combined_rsrp_dict, fh)

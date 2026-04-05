@@ -319,12 +319,12 @@ if 1:
     for op in op_list:
         for day in ['day_1', 'day_2', 'day_3', 'day_4']:
             print("Processing operator: %s, day: %s" %(op, day))
-            fh = open("/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/raw_data/template_data/%s_%s.pkl" %(op, day), "rb")
+            fh = open("../raw_data/template_data/%s_%s.pkl" %(op, day), "rb")
             df_template = pkl.load(fh)
             fh.close()
 
             # Load timing advance df 
-            timing_advance_df = pd.read_csv('/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/raw_data/timing_advance_csv/%s/%s_%s_with_area.csv' %(op, op, day))
+            timing_advance_df = pd.read_csv('../raw_data/timing_advance_csv/%s/%s_%s_with_area.csv' %(op, op, day))
             timing_advance_df.drop(timing_advance_df.tail(8).index, inplace=True)
             timing_advance_df['TIME_STAMP'] = timing_advance_df['TIME_STAMP'].apply(datetime_to_timestamp_original)
             timing_advance_df = timing_advance_df.rename(columns={'TIME_STAMP': 'Timestamp'})
@@ -475,13 +475,13 @@ if 1:
         print(f"Saving mainland data for {area} areas...")
         
         # Save distance data
-        dist_filename = f'/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/mainland_ta_dist_dict_{area}.pkl'
+        dist_filename = f'../processed_files/mainland_ta_dist_dict_{area}.pkl'
         with open(dist_filename, 'wb') as fh:
             pkl.dump(mainland_ta_dist_dict_by_area[area], fh)
         print(f"Saved: {dist_filename}")
         
         # Save RSRP-distance data
-        rsrp_filename = f'/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/mainland_rsrp_distance_dict_{area}.pkl'
+        rsrp_filename = f'../processed_files/mainland_rsrp_distance_dict_{area}.pkl'
         with open(rsrp_filename, 'wb') as fh:
             pkl.dump(mainland_rsrp_distance_dict_by_area[area], fh)
         print(f"Saved: {rsrp_filename}")
@@ -500,10 +500,10 @@ if 1:
     }
     
     # Save combined files
-    with open('/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/mainland_ta_dist_dict_all_areas.pkl', 'wb') as fh:
+    with open('../processed_files/mainland_ta_dist_dict_all_areas.pkl', 'wb') as fh:
         pkl.dump(combined_mainland_ta_dict, fh)
     
-    with open('/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/mainland_rsrp_distance_dict_all_areas.pkl', 'wb') as fh:
+    with open('../processed_files/mainland_rsrp_distance_dict_all_areas.pkl', 'wb') as fh:
         pkl.dump(combined_mainland_rsrp_dict, fh)
     
     print("All mainland area-based data processing completed!")

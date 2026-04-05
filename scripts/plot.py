@@ -3,12 +3,12 @@ import numpy as np
 from matplotlib.patches import Patch
 import pickle as pkl
 # Load the combined area data
-filename = '/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/hawaii_alaska_rsrp_distance_dict_all_areas.pkl'
+filename = '../processed_files/hawaii_alaska_rsrp_distance_dict_all_areas.pkl'
 with open(filename, 'rb') as fh:
     non_mainland_all_areas_data = pkl.load(fh)
 
 # Load the combined area data
-filename = '/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/processed_files/mainland_rsrp_distance_dict_all_areas.pkl'
+filename = '../processed_files/mainland_rsrp_distance_dict_all_areas.pkl'
 with open(filename, 'rb') as fh:
     mainland_all_areas_data = pkl.load(fh)
 
@@ -219,7 +219,7 @@ for region in regions:
             ax.legend(op_handles, op_labels, loc='upper left')
 
         # save figure
-        filename = f"/mnt/nuwinsshared/moinak/sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-satellites-to-the-rescue/plots/boxplots_{region}_{metric}_individual_v2.png"
+        filename = f"../plots/boxplots_{region}_{metric}_individual_v2.png"
         fig.tight_layout()
         fig.savefig(filename, dpi=600)
         plt.close(fig)
