@@ -34,6 +34,8 @@ def plot_tech_dist_stack_with_area_sidebyside(
         lon_field: str = XcalField.LON,
         timestamp_field: str = CommonField.LOCAL_DT,
         legend_fontsize: int = 9,
+        label_fontsize: int = None,
+        tick_label_fontsize: int = None,
     ):
     """Plot side-by-side stacked bars comparing tech distribution between area types for each operator
     """    
@@ -142,11 +144,16 @@ def plot_tech_dist_stack_with_area_sidebyside(
             bottom += values
     
     # Customize the plot
-    ax.set_ylabel('Fraction of Miles')
+    if label_fontsize:
+        ax.set_ylabel('Fraction of Miles', fontsize=label_fontsize)
+    else:
+        ax.set_ylabel('Fraction of Miles')
     ax.set_yticks(np.arange(0, 1.1, 0.2))
     ax.set_xticks(x_positions)
     ax.set_xticklabels([operator_conf[op]['abbr'] for op in operators])
-    
+    if tick_label_fontsize:
+        ax.tick_params(axis='both', which='major', labelsize=tick_label_fontsize)
+
     # Set x-axis limits
     ax.set_xlim(-0.5, len(operators) - 0.5)
     
@@ -235,6 +242,8 @@ def plot_tech_dist_stack(
         lon_field: str = XcalField.LON,
         timestamp_field: str = CommonField.LOCAL_DT,
         legend_fontsize = 9,
+        label_fontsize: int = None,
+        tick_label_fontsize: int = None,
     ):
     """Plot a stack plot of the tech distribution for each operator
     
@@ -322,11 +331,16 @@ def plot_tech_dist_stack(
     
     # ax.set_title(title)
     # ax.set_xlabel('Operator')
-    ax.set_ylabel('Fraction of Miles')
+    if label_fontsize:
+        ax.set_ylabel('Fraction of Miles', fontsize=label_fontsize)
+    else:
+        ax.set_ylabel('Fraction of Miles')
     ax.set_yticks(np.arange(0, 1.1, 0.2))
     ax.set_xticks(x)
     ax.set_xticklabels(map(lambda x: operator_conf[x]['abbr'], operators))
-    
+    if tick_label_fontsize:
+        ax.tick_params(axis='both', which='major', labelsize=tick_label_fontsize)
+
     # Set x-axis limits to maintain consistent spacing
     ax.set_xlim(x[0] - bar_width * 1.5, x[-1] + bar_width * 1.5)
     
@@ -372,148 +386,140 @@ def plot_tech_dist_stack(
     logger.info(f"Saved technology distribution stats to {stats_json_path}")
 
 
+LOCATION_MAP = {
+    'alaska': {
+        'xcal_dir': 'xcal/',
+        'ping_dir': 'ping',
+        'output_dir': 'outputs/',
+        'xcal_filename': lambda operator: f'{operator}_xcal_smart_tput.csv',
+        'ping_filename': lambda operator: f'{operator}_ping.csv',
+    },
+    'hawaii': {
+        'xcal_dir': 'xcal/',
+        'ping_dir': 'ping',
+        'output_dir': 'outputs/',
+        'xcal_filename': lambda operator: f'{operator}_xcal_smart_tput.csv',
+        'ping_filename': lambda operator: f'{operator}_ping.csv',
+    },
+    'la_to_omaha': {
+        'xcal_dir': 'throughput',
+        'ping_dir': 'latency',
+        'output_dir': 'outputs',
+        'xcal_filename': lambda operator: f'xcal_smart_tput.tcp_downlink.{operator}.normal.2024-11-01-2024-11-05.csv',
+        'ping_filename': lambda operator: f'icmp_ping.{operator}.normal.2024-11-01-2024-11-05.csv',
+    },
+}
+
+
+def get_tput_rtt_df_for_ak_or_hi(location: str, base_dir: str, loc_map: dict):
+    xcal_dir = os.path.join(base_dir, loc_map['xcal_dir'])
+    operator_dfs = {}
+    for operator in sorted(cellular_location_conf[location]['operators'], key=lambda x: cellular_operator_conf[x]['order']):
+        logger.info(f'---- Processing operator: {operator}')
+        smart_tput_csv_path = os.path.join(xcal_dir, loc_map['xcal_filename'](operator))
+        rtt_csv_path = os.path.join(base_dir, loc_map['ping_dir'], loc_map['ping_filename'](operator))
+
+        smart_tput_df = pd.read_csv(smart_tput_csv_path)
+        smart_tput_df['type'] = smart_tput_df[XcalField.APP_TPUT_PROTOCOL] + '_' + smart_tput_df[XcalField.APP_TPUT_DIRECTION]
+        rtt_df = pd.read_csv(rtt_csv_path)
+        rtt_df['type'] = 'rtt'
+
+        tput_sub_df = smart_tput_df[[CommonField.LOCAL_DT, CommonField.AREA_TYPE, XcalField.SEGMENT_ID, XcalField.ACTUAL_TECH, XcalField.LON, XcalField.LAT, 'type']]
+        rtt_sub_df = rtt_df[[CommonField.LOCAL_DT, CommonField.AREA_TYPE, XcalField.SEGMENT_ID, XcalField.ACTUAL_TECH, XcalField.LON, XcalField.LAT, 'type']]
+        df = pd.concat([tput_sub_df, rtt_sub_df], ignore_index=True)
+        df.sort_values(by=[CommonField.LOCAL_DT], inplace=True)
+        operator_dfs[operator] = df
+    return operator_dfs
+
+
+def get_tput_rtt_df_for_la_to_omaha(location: str, base_dir: str):
+    operator_dfs = {}
+    for operator in sorted(cellular_location_conf[location]['operators'], key=lambda x: cellular_operator_conf[x]['order']):
+        logger.info(f'---- Processing operator: {operator}')
+        suffix = '2024-11-01-2024-11-05'
+        tcp_dl_csv_path = os.path.join(base_dir, 'throughput', LaToBosDataLoader.get_xcal_filename(operator, 'tcp_downlink', suffix))
+        tcp_ul_csv_path = os.path.join(base_dir, 'throughput', LaToBosDataLoader.get_xcal_filename(operator, 'tcp_uplink', suffix))
+        rtt_csv_path = os.path.join(base_dir, 'latency', LaToBosDataLoader.get_rtt_filename(operator, suffix))
+
+        tcp_dl_df = pd.read_csv(tcp_dl_csv_path)
+        tcp_dl_df['type'] = 'tcp_downlink'
+        tcp_ul_df = pd.read_csv(tcp_ul_csv_path)
+        tcp_ul_df['type'] = 'tcp_uplink'
+        rtt_df = pd.read_csv(rtt_csv_path)
+        rtt_df['type'] = 'rtt'
+
+        tput_dl_sub_df = tcp_dl_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
+        tput_ul_sub_df = tcp_ul_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
+        rtt_sub_df = rtt_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
+        df = pd.concat([tput_dl_sub_df, tput_ul_sub_df, rtt_sub_df], ignore_index=True)
+        df.sort_values(by=[CommonField.LOCAL_DT], inplace=True)
+        operator_dfs[operator] = df
+    return operator_dfs
+
+
+def get_tput_rtt_df(location: str, base_dir: str, loc_map: dict):
+    if location in ['alaska', 'hawaii']:
+        return get_tput_rtt_df_for_ak_or_hi(location, base_dir, loc_map)
+    elif location in ['la_to_omaha']:
+        return get_tput_rtt_df_for_la_to_omaha(location, base_dir)
+    else:
+        raise ValueError(f'Invalid location: {location}')
+
+
+def get_field_config(location: str):
+    if location in ['alaska', 'hawaii']:
+        return {
+            'area_field': XcalField.AREA,
+            'segment_id_field': XcalField.SEGMENT_ID,
+            'lat_field': XcalField.LAT,
+            'lon_field': XcalField.LON,
+            'timestamp_field': CommonField.LOCAL_DT,
+        }
+    elif location in ['la_to_omaha']:
+        return {
+            'area_field': CommonField.AREA_TYPE,
+            'segment_id_field': CommonField.SEGMENT_ID,
+            'lat_field': CommonField.LAT,
+            'lon_field': CommonField.LON,
+            'timestamp_field': CommonField.UTC_TS,
+        }
+    else:
+        raise ValueError(f'Invalid location: {location}')
+
+
 def main():
-    location_map = {
-        'alaska': {
-            'xcal_dir': 'xcal/',
-            'ping_dir': 'ping',
-            'output_dir': 'outputs/',
-            'xcal_filename': lambda operator: f'{operator}_xcal_smart_tput.csv',
-            'ping_filename': lambda operator: f'{operator}_ping.csv',
-        },
-        'hawaii': {
-            'xcal_dir': 'xcal/',
-            'ping_dir': 'ping',
-            'output_dir': 'outputs/',
-            'xcal_filename': lambda operator: f'{operator}_xcal_smart_tput.csv',
-            'ping_filename': lambda operator: f'{operator}_ping.csv',
-        },
-        'la_to_omaha': {
-            'xcal_dir': 'throughput',
-            'ping_dir': 'latency',
-            'output_dir': 'outputs',
-            'xcal_filename': lambda operator: f'xcal_smart_tput.tcp_downlink.{operator}.normal.2024-11-01-2024-11-05.csv',
-            'ping_filename': lambda operator: f'icmp_ping.{operator}.normal.2024-11-01-2024-11-05.csv',
-        },
-    }
-
-
-
     for location in ['alaska', 'hawaii', 'la_to_omaha']:
         logger.info(f'-- Processing dataset: {location}')
-        loc_map = location_map[location]
+        loc_map = LOCATION_MAP[location]
         base_dir = os.path.join(cellular_location_conf[location]['root_dir'], 'processed')
-        xcal_dir = os.path.join(base_dir, loc_map['xcal_dir'])
         output_dir = os.path.join(current_dir, loc_map['output_dir'], location)
         legend_fontsize = 9 if location in ['alaska', 'hawaii'] else 7
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        # Store dataframes for all operators
-
-        def get_tput_rtt_df(location: str):
-            if location in ['alaska', 'hawaii']:
-                return get_tput_rtt_df_for_ak_or_hi(location)
-            elif location in ['la_to_omaha']:
-                return get_tput_rtt_df_for_la_to_omaha(location)
-            else:
-                raise ValueError(f'Invalid location: {location}')
-
-        def get_tput_rtt_df_for_ak_or_hi(location: str):
-            operator_dfs = {}
-            for operator in sorted(cellular_location_conf[location]['operators'], key=lambda x: cellular_operator_conf[x]['order']):
-                logger.info(f'---- Processing operator: {operator}')
-                smart_tput_csv_path = os.path.join(xcal_dir, loc_map['xcal_filename'](operator))
-                rtt_csv_path = os.path.join(base_dir, loc_map['ping_dir'], loc_map['ping_filename'](operator))
-
-                smart_tput_df = pd.read_csv(smart_tput_csv_path)
-                smart_tput_df['type'] = smart_tput_df[XcalField.APP_TPUT_PROTOCOL] + '_' + smart_tput_df[XcalField.APP_TPUT_DIRECTION]
-                rtt_df = pd.read_csv(rtt_csv_path)
-                rtt_df['type'] = 'rtt'
-
-                # Merge the dataframes to create a common structure
-                tput_sub_df = smart_tput_df[[CommonField.LOCAL_DT, CommonField.AREA_TYPE, XcalField.SEGMENT_ID, XcalField.ACTUAL_TECH, XcalField.LON, XcalField.LAT, 'type']]
-                rtt_sub_df = rtt_df[[CommonField.LOCAL_DT, CommonField.AREA_TYPE, XcalField.SEGMENT_ID, XcalField.ACTUAL_TECH, XcalField.LON, XcalField.LAT, 'type']]
-                df = pd.concat(
-                    [
-                        tput_sub_df, 
-                        rtt_sub_df
-                    ],
-                    ignore_index=True
-                )
-                df.sort_values(by=[CommonField.LOCAL_DT], inplace=True)
-                # df.to_csv(os.path.join(xcal_dir, f'{operator}_coverage_with_tput_and_rtt.csv'), index=False)
-                operator_dfs[operator] = df
-            return operator_dfs
-
-        def get_tput_rtt_df_for_la_to_omaha(location: str):
-            operator_dfs = {}
-            for operator in sorted(cellular_location_conf[location]['operators'], key=lambda x: cellular_operator_conf[x]['order']):
-                logger.info(f'---- Processing operator: {operator}')                
-                suffix = '2024-11-01-2024-11-05'
-                tcp_dl_csv_path = os.path.join(base_dir, 'throughput', LaToBosDataLoader.get_xcal_filename(operator, 'tcp_downlink', suffix))
-                tcp_ul_csv_path = os.path.join(base_dir, 'throughput', LaToBosDataLoader.get_xcal_filename(operator, 'tcp_uplink', suffix))
-                rtt_csv_path = os.path.join(base_dir, 'latency', LaToBosDataLoader.get_rtt_filename(operator, suffix))
-
-                tcp_dl_df = pd.read_csv(tcp_dl_csv_path)
-                tcp_dl_df['type'] = 'tcp_downlink'
-                tcp_ul_df = pd.read_csv(tcp_ul_csv_path)
-                tcp_ul_df['type'] = 'tcp_uplink'
-                rtt_df = pd.read_csv(rtt_csv_path)
-                rtt_df['type'] = 'rtt'
-
-                # Merge the dataframes to create a common structure
-                tput_dl_sub_df = tcp_dl_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
-                tput_ul_sub_df = tcp_ul_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
-                rtt_sub_df = rtt_df[[CommonField.LOCAL_DT, CommonField.UTC_TS, CommonField.AREA_TYPE, CommonField.SEGMENT_ID, CommonField.ACTUAL_TECH, CommonField.LON, CommonField.LAT, 'type']]
-                df = pd.concat(
-                    [
-                        tput_dl_sub_df, 
-                        tput_ul_sub_df,
-                        rtt_sub_df
-                    ],
-                    ignore_index=True
-                )
-                df.sort_values(by=[CommonField.LOCAL_DT], inplace=True)
-                # df.to_csv(os.path.join(xcal_dir, f'{operator}_coverage_with_tput_and_rtt.csv'), index=False)
-                operator_dfs[operator] = df
-            return operator_dfs
-
-        operator_dfs = get_tput_rtt_df(location)
+        operator_dfs = get_tput_rtt_df(location, base_dir, loc_map)
         loc_label = cellular_location_conf[location]['label']
-
-        if location in ['alaska', 'hawaii']:
-            area_field = XcalField.AREA
-            segment_id_field = XcalField.SEGMENT_ID
-            lat_field = XcalField.LAT
-            lon_field = XcalField.LON
-        elif location in ['la_to_omaha']:
-            area_field = CommonField.AREA_TYPE
-            segment_id_field = CommonField.SEGMENT_ID
-            lat_field = CommonField.LAT
-            lon_field = CommonField.LON
-        else:
-            raise ValueError(f'Invalid location: {location}')
+        fields = get_field_config(location)
 
         # All Areas
         plot_tech_dist_stack(
             dfs=operator_dfs,
-            output_dir=output_dir, 
+            output_dir=output_dir,
             location_conf=cellular_location_conf,
             operator_conf=cellular_operator_conf,
             tech_conf=tech_conf,
             figsize=(3, 2.5),
             title=f'Technology Distribution ({loc_label}-All Areas)',
             fig_name=f'tech_dist_stack_all_areas.{location}',
-            segment_id_field=segment_id_field,
-            lat_field=lat_field,
-            lon_field=lon_field,
-            timestamp_field=CommonField.LOCAL_DT if location in ['alaska', 'hawaii'] else CommonField.UTC_TS,
+            segment_id_field=fields['segment_id_field'],
+            lat_field=fields['lat_field'],
+            lon_field=fields['lon_field'],
+            timestamp_field=fields['timestamp_field'],
             legend_fontsize=legend_fontsize,
         )
 
-        # # Side-by-side comparison for Urban vs Rural
+        # Side-by-side comparison for Urban vs Rural
         plot_tech_dist_stack_with_area_sidebyside(
             dfs=operator_dfs,
             output_dir=output_dir,
@@ -524,11 +530,11 @@ def main():
             figsize=(3.7, 3.2),
             title=f'Technology Distribution ({loc_label}-Urban vs Rural)',
             fig_name=f'tech_dist_stack_urban_vs_rural.{location}',
-            area_field=area_field,
-            segment_id_field=segment_id_field,
-            lat_field=lat_field,
-            lon_field=lon_field,
-            timestamp_field=CommonField.LOCAL_DT if location in ['alaska', 'hawaii'] else CommonField.UTC_TS,
+            area_field=fields['area_field'],
+            segment_id_field=fields['segment_id_field'],
+            lat_field=fields['lat_field'],
+            lon_field=fields['lon_field'],
+            timestamp_field=fields['timestamp_field'],
             legend_fontsize=legend_fontsize,
         )
 

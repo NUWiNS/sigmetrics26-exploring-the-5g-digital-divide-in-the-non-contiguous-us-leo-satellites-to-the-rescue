@@ -215,7 +215,7 @@ class NetworkKpiPlotter(IPlotter):
             'tcp_ul': {
                 'fig_width': fig_width,
                 'fig_height': fig_height,
-                'xlabel': 'Throughput (Mbps)', 
+                'xlabel': 'Throughput (Mbps)',
                 'title': 'TCP Uplink Throughput',
                 'value_col': CommonField.TPUT_MBPS,
                 'x_limit': (0, 75),
@@ -252,10 +252,24 @@ class NetworkKpiPlotter(IPlotter):
         tick_label_font_size: int = None,
         x_tick_rotation: int = None,
         dpi: int = 300,
+        legend_font_size: int = 9,
+        override_tcp_dl_conf: dict = None,
+        override_tcp_ul_conf: dict = None,
+        override_rtt_conf: dict = None
     ):
         data = self.data_generator.get_plot_data()
         data_order = self.data_generator.get_plot_order()
         metric_configs = self.get_metric_configs(fig_width, fig_height)
+        
+        for metric, conf in [
+            ('tcp_dl', override_tcp_dl_conf), 
+            ('tcp_ul', override_tcp_ul_conf), 
+            ('rtt', override_rtt_conf), 
+        ]:
+            if not isinstance(conf, dict):
+                continue
+            for key in conf:
+                metric_configs[metric][key] = conf[key]
 
         # Create separate plots for each metric
         for metric in data_order:
@@ -277,6 +291,7 @@ class NetworkKpiPlotter(IPlotter):
                 label_font_size=label_font_size,
                 tick_label_font_size=tick_label_font_size,
                 x_tick_rotation=x_tick_rotation,
+                legend_font_size=legend_font_size,
             )
 
     def _plot_single_metric(
@@ -297,6 +312,7 @@ class NetworkKpiPlotter(IPlotter):
         right_margin: float = None,
         top_margin: float = None,
         bottom_margin: float = None,
+        legend_font_size: int = 9,
     ):
         # Create single figure
         fig, ax = plt.subplots(1, 1, figsize=(fig_width, fig_height))
@@ -358,26 +374,29 @@ class NetworkKpiPlotter(IPlotter):
         
         # Configure plot
         # ax.set_title(config['title'], fontsize=12, fontweight='bold')
-        if label_font_size:
-            ax.set_xlabel(config['xlabel'], fontsize=label_font_size)
+        effective_label_font_size = config.get('label_font_size', label_font_size)
+        effective_tick_label_font_size = config.get('tick_label_font_size', tick_label_font_size)
+
+        if effective_label_font_size:
+            ax.set_xlabel(config['xlabel'], fontsize=effective_label_font_size)
         else:
             ax.set_xlabel(config['xlabel'])
-        
+
         print('x_tick_rotation', x_tick_rotation)
         if x_tick_rotation:
             ax.tick_params(axis='x', rotation=x_tick_rotation)
 
-        if tick_label_font_size:
-            ax.tick_params(axis='both', which='major', labelsize=tick_label_font_size)
+        if effective_tick_label_font_size:
+            ax.tick_params(axis='both', which='major', labelsize=effective_tick_label_font_size)
 
         if config.get('show_y_label', True):
-            if tick_label_font_size:
-                ax.set_ylabel('CDF', fontsize=tick_label_font_size)
+            if effective_tick_label_font_size:
+                ax.set_ylabel('CDF', fontsize=effective_tick_label_font_size)
             else:
                 ax.set_ylabel('CDF')
         else:
-            if tick_label_font_size:
-                ax.set_ylabel('', fontsize=tick_label_font_size)
+            if effective_tick_label_font_size:
+                ax.set_ylabel('', fontsize=effective_tick_label_font_size)
             else:
                 ax.set_ylabel('')
         ax.grid(True, alpha=0.3)
@@ -406,10 +425,11 @@ class NetworkKpiPlotter(IPlotter):
                 all_lines.append(line)
         
         # Add legends based on metric type
+        metric_legend_font_size = config.get('legend_font_size', legend_font_size)
         if config.get('show_legend', False) == 'operator':
-            self.add_operator_legend(ax, combinations)
+            self.add_operator_legend(ax, combinations, legend_font_size=metric_legend_font_size)
         elif config.get('show_legend', False) == 'location':
-            self.add_location_legend(ax, combinations)
+            self.add_location_legend(ax, combinations, legend_font_size=metric_legend_font_size)
         else:
             pass
         
@@ -445,7 +465,7 @@ class NetworkKpiPlotter(IPlotter):
         
         plt.close()
 
-    def add_operator_legend(self, ax: plt.Axes, combinations: pd.DataFrame):
+    def add_operator_legend(self, ax: plt.Axes, combinations: pd.DataFrame, legend_font_size: int = 9):
         """Create operator legend emphasized by colors with solid lines."""
         op_legend_handles = []
         op_legend_labels = []
@@ -478,10 +498,10 @@ class NetworkKpiPlotter(IPlotter):
         ax.legend(handles=op_legend_handles, 
                     labels=op_legend_labels,
                     loc='lower right', 
-                    fontsize=9,
+                    fontsize=legend_font_size,
                     framealpha=0.7)
 
-    def add_location_legend(self, ax: plt.Axes, combinations: pd.DataFrame):
+    def add_location_legend(self, ax: plt.Axes, combinations: pd.DataFrame, legend_font_size: int = 9):
         """Create location legend emphasized by line styles with black color."""
         loc_legend_handles = []
         loc_legend_labels = []
@@ -519,7 +539,7 @@ class NetworkKpiPlotter(IPlotter):
         ax.legend(handles=loc_legend_handles, 
                     labels=loc_legend_labels,
                     loc='lower right', 
-                    fontsize=9,
+                    fontsize=legend_font_size,
                     framealpha=0.7)
 
 def main():

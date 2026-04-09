@@ -164,7 +164,7 @@ class StarlinkNetworkKpiPlotter(NetworkKpiPlotter):
         )
     
     @override
-    def get_metric_configs(self, fig_width: float, fig_height: float):
+    def get_metric_configs(self, fig_width: float, fig_height: float, legend_font_size: int = 9):
         # Configuration for each metric
         return {
             'tcp_dl': {
@@ -179,11 +179,12 @@ class StarlinkNetworkKpiPlotter(NetworkKpiPlotter):
                 'show_y_label': True,
                 'show_y_ticks': True,
                 'show_legend': 'location',
+                'legend_font_size': legend_font_size,
             },
             'tcp_ul': {
                 'fig_width': fig_width,
                 'fig_height': fig_height,
-                'xlabel': 'Throughput (Mbps)', 
+                'xlabel': 'Throughput (Mbps)',
                 'title': 'TCP Uplink Throughput',
                 'value_col': CommonField.TPUT_MBPS,
                 'x_limit': (0, 30),
@@ -192,6 +193,7 @@ class StarlinkNetworkKpiPlotter(NetworkKpiPlotter):
                 'show_y_label': False,
                 'show_y_ticks': False,
                 'show_legend': False,
+                'legend_font_size': legend_font_size,
             },
             'rtt': {
                 'fig_width': fig_width,
@@ -205,6 +207,7 @@ class StarlinkNetworkKpiPlotter(NetworkKpiPlotter):
                 'show_y_label': False,
                 'show_y_ticks': False,
                 'show_legend': False,
+                'legend_font_size': legend_font_size,
             },
         }
 

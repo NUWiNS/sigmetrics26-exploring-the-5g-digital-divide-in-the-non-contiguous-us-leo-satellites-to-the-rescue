@@ -113,7 +113,7 @@ class NonContiguousWithAreasNetworkKpiPlotter(IPlotter):
         self.operator_legend_presentation = operator_legend_presentation
         self.area_legend_presentation = area_legend_presentation
 
-    def get_metric_configs(self, fig_width: float, fig_height: float):
+    def get_metric_configs(self, fig_width: float, fig_height: float, legend_font_size: int = 9):
         # Configuration for each metric
         return {
             'tcp_dl': {
@@ -128,11 +128,12 @@ class NonContiguousWithAreasNetworkKpiPlotter(IPlotter):
                 'show_y_label': True,
                 'show_y_ticks': True,
                 'show_legend': 'operator',
+                'legend_font_size': legend_font_size,
             },
             'tcp_ul': {
                 'fig_width': fig_width,
                 'fig_height': fig_height,
-                'xlabel': 'Throughput (Mbps)', 
+                'xlabel': 'Throughput (Mbps)',
                 'title': 'TCP Uplink Throughput',
                 'value_col': CommonField.TPUT_MBPS,
                 'x_limit': (0, 60),
@@ -141,6 +142,7 @@ class NonContiguousWithAreasNetworkKpiPlotter(IPlotter):
                 'show_y_label': False,
                 'show_y_ticks': False,
                 'show_legend': 'area',
+                'legend_font_size': legend_font_size,
             },
             'rtt': {
                 'fig_width': fig_width,
@@ -154,22 +156,24 @@ class NonContiguousWithAreasNetworkKpiPlotter(IPlotter):
                 'show_y_label': False,
                 'show_y_ticks': False,
                 'show_legend': False,
+                'legend_font_size': legend_font_size,
             },
         }
 
     @override
     def plot(
-        self, 
+        self,
         output_filename: str = None,
         fig_width: float = 3,
         fig_height: float = 4,
         line_width: float = 2.5,
         line_alpha: float = 0.8,
         dpi: int = 300,
+        legend_font_size: int = 9,
     ):
         data = self.data_generator.get_plot_data()
         data_order = self.data_generator.get_plot_order()
-        metric_configs = self.get_metric_configs(fig_width, fig_height)
+        metric_configs = self.get_metric_configs(fig_width, fig_height, legend_font_size=legend_font_size)
 
         # Create separate plots for each metric
         for metric in data_order:
