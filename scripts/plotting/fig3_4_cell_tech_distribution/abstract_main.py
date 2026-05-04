@@ -5,7 +5,7 @@ import pandas as pd
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
-from scripts.plotting.fig3_cell_tech_distribution.main import (
+from scripts.plotting.fig3_4_cell_tech_distribution.main import (
     plot_tech_dist_stack,
     plot_tech_dist_stack_with_area_sidebyside,
 )

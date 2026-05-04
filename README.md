@@ -17,6 +17,17 @@ In this repository, we release the dataset and scripts used in the SIGMETRICS '2
 
 ---
 
+## Prerequisites
+
+Python: >= 3.12
+
+Install the required Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+---
+
 ## Data Access
 
 The dataset files are stored using **Git LFS** (Large File Storage). After cloning the repository, use the following command to download the large dataset files:
@@ -29,9 +40,10 @@ cd sigmetrics26-exploring-the-5g-digital-divide-in-the-non-contiguous-us-leo-sat
 # Download large files tracked by Git LFS
 git lfs pull
 
-# Unzip the compressed tar file
-# Files will be placed in datasets/
-tar -xzvf processed_data.tar.gz
+# Unzip all compressed tar files
+tar -xzvf datasets/alaska_road_test_202406.processed.tar.gz -C datasets
+tar -xzvf datasets/hawaii_road_test_202408.processed.tar.gz -C datasets
+tar -xzvf datasets/la_to_omaha_road_test_202411.processed.tar.gz -C datasets
 ```
 
 If you don't have Git LFS installed:
@@ -48,15 +60,6 @@ git lfs install
 
 ---
 
-## Prerequisites
-
-Install the required Python dependencies:
-```bash
-pip install -r requirements.txt
-```
-
----
-
 ## Repository Structure & Usage
 
 - **`datasets/`**
@@ -65,11 +68,27 @@ pip install -r requirements.txt
   - `hawaii_road_test_202408/` — Hawaii road test data (August 2024)
   - `la_to_omaha_road_test_202411/` — LA to Omaha road test data (November 2024)
 
+  After extracting the `*.processed.tar.gz` archives, each campaign directory contains released data under `processed/`. The folder set varies by campaign:
+
+  - `processed/throughput/` — TCP downlink/uplink throughput summaries by operator and access network.
+  - `processed/starlink/` — Starlink-specific network KPI summaries.
+  - `processed/bs_dist_rsrp/` — Cellular base station distance and RSRP summaries.
+  - `processed/ping/` — ICMP RTT summaries for Alaska and Hawaii.
+  - `processed/latency/` — ICMP RTT summaries for the LA-to-Omaha campaign.
+  - `processed/xcal/` — XCAL-derived cellular throughput summaries for Alaska and Hawaii.
+  - `processed/mptcp/` — Operator-pair traces used for MPTCP opportunity analysis in Alaska and Hawaii.
+  - `processed/mpshell/` — Alaska and Hawaii MPShell fused traces and derived emulation summaries:
+    - `raw_traces/` — Fused single-link trace inputs.
+    - `emulation_results/` — Derived single-link, MPTCP, sum, max, and delta summaries for the emulation figures.
+  - `processed/throughput_bbr/` and `processed/throughput_cubic/` — Alaska throughput summaries split by congestion control.
+
 - **`scripts/`**
-  Contains utility modules and plotting scripts:
+  Contains utility modules, MPShell runners, and plotting scripts:
+  - **`mpshell/`** — Scripts for running single-link/MPTCP MPShell experiments.
   - **`plotting/`** — Scripts to generate all figures in the paper:
     - `fig2_tput_with_cc_and_buffer/` — Throughput with congestion control and buffer
-    - `fig3_cell_tech_distribution/` — Cellular technology distribution
+    - `fig3_4_cell_tech_distribution/` — Cellular technology distribution for Figures 3 and 4
+    - `fig5_cell_bs_distance_rsrp/` — Cellular base station distance and RSRP
     - `fig6_cell_kpis_across_loc/` — Cellular KPIs across locations
     - `fig7_cell_rb_alaska/` — Cellular resource blocks in Alaska
     - `fig8_cell_tcp_dl_with_areas/` — Cellular TCP downlink throughput CDF by area
@@ -81,7 +100,19 @@ pip install -r requirements.txt
     - `fig15_starlink_cell_network_kpis_in_non_contiguous/` — Starlink vs Cellular in non-contiguous US
     - `fig16_starlink_cell_network_kpis_with_areas_in_non_contiguous/` — Starlink vs Cellular by area
     - `fig17_delta_tput_between_operators/` — Throughput delta between operators
+    - `fig18_19_mptcp_emulation/` — MPShell single-link and MPTCP performance plotting scripts
     - `tab1_concurrent_outage/` — Analysis of concurrent outage between operators (Table 1)
+
+---
+
+## Plotting
+
+```
+cd scripts/plotting
+
+# Output will be placed locally in the folder
+python <fig-folder-name>/main.py
+```
 
 ---
 
