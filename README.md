@@ -1,6 +1,6 @@
 # [SIGMETRICS '26] Exploring the 5G Digital Divide in the Non-Contiguous US: LEO Satellites to the Rescue?
 
-Cellular & Starlink Measurement in Non-Contiguous and Mainland US
+![Cellular & Starlink Measurement in Non-Contiguous and Mainland US](cover.jpg)
 
 In this repository, we release the dataset and scripts used in the SIGMETRICS '26 paper, *[Exploring the 5G Digital Divide in the Non-Contiguous US: LEO Satellites to the Rescue?](https://dl.acm.org/doi/abs/10.1145/3771568)*
 
@@ -29,13 +29,21 @@ Our study shows a persistent digital divide between mainland and non-contiguous 
 
 This dataset is designed for reproducibility but is equally useful as a standalone resource for new research.
 
-**Digital divide benchmarking.** Alaska and Hawaii are among the most understudied regions in US networking research, yet they differ substantially from the mainland in terrain, population density, and operator infrastructure. This dataset provides the first publicly available, operator-concurrent 5G measurement across non-contiguous US regions with a purpose-built mainland baseline (LA → Omaha). Researchers studying coverage equity, spectrum policy, or rural broadband can use it to establish and reproduce quantitative gap estimates without conducting their own drive tests.
+### Digital divide benchmarking 
 
-**LEO satellite vs. cellular comparison.** Concurrent measurements of Starlink and all three major US cellular operators on identical routes — collected simultaneously — are uncommon in public datasets. The Starlink telemetry includes dish-level KPIs (obstruction fraction, outage cause and duration, SNR flags) alongside application-layer throughput, enabling deeper analysis than app-level measurement alone. This makes the dataset directly useful for researchers studying LEO satellite performance, or the viability of Starlink as a cellular complement in underserved markets.
+Alaska and Hawaii are among the most understudied regions in US networking research, yet they differ substantially from the mainland in terrain, population density, and operator infrastructure. This dataset provides the first publicly available, operator-concurrent 5G measurement across non-contiguous US regions with a purpose-built mainland baseline (LA → Omaha). Researchers studying coverage equity, spectrum policy, or rural broadband can use it to establish and reproduce quantitative gap estimates without conducting their own drive tests.
 
-**Multipath transport emulation.** Network performance across operators in non-contiguous regions tends to be less correlated than in well-covered urban areas, creating stronger motivation and larger gains for multipath scheduling. The dataset includes pre-aligned operator-pair traces and MPShell emulation outputs, so researchers can evaluate new MPTCP scheduling algorithms or link-bonding strategies on real non-contiguous traces without re-collecting data.
+### LEO satellite vs. cellular comparison 
 
-**ML-driven network prediction.** Fine-grained samples (200–500 ms intervals) with co-located features — throughput, RSRP, PRB counts, tech labels, GPS, weather, congestion window, and Starlink outage flags — support supervised learning tasks such as throughput prediction, handover detection, and coverage quality estimation. The distributional shift between non-contiguous and mainland US also makes this a useful testbed for evaluating model generalization across geographic domains.
+Concurrent measurements of Starlink and all three major US cellular operators on identical routes — collected simultaneously — are uncommon in public datasets. The Starlink telemetry includes dish-level KPIs (obstruction fraction, outage cause and duration, SNR flags) alongside application-layer throughput, enabling deeper analysis than app-level measurement alone. This makes the dataset directly useful for researchers studying LEO satellite performance, or the viability of Starlink as a cellular complement in underserved markets.
+
+### Multipath transport emulation
+
+Network performance across operators in non-contiguous regions tends to be less correlated than in well-covered urban areas, creating stronger motivation and larger gains for multipath scheduling. The dataset includes pre-aligned operator-pair traces and MPShell emulation outputs, so researchers can evaluate new MPTCP scheduling algorithms or link-bonding strategies on real non-contiguous traces without re-collecting data.
+
+### ML-driven network prediction
+
+Fine-grained samples (200–500 ms intervals) with co-located features — throughput, RSRP, PRB counts, tech labels, GPS, weather, congestion window, and Starlink outage flags — support supervised learning tasks such as throughput prediction, handover detection, and coverage quality estimation. The distributional shift between non-contiguous and mainland US also makes this a useful testbed for evaluating model generalization across geographic domains.
 
 ---
 
@@ -51,9 +59,7 @@ Three road-test campaigns covering AT&T, Verizon, T-Mobile, and Starlink. Tarbal
 | Mainland baseline | Los Angeles, CA → Omaha, NE; Urban area & highway routes | November 2024 | AT&T, T-Mobile, Verizon, Starlink | Throughput, Latency, RSRP, Starlink KPIs, XCAL                              |
 
 
----
-
-## Data Access
+### Data Access
 
 The dataset files are stored using **Git LFS** (Large File Storage). After cloning the repository, use the following command to download the large dataset files:
 
@@ -95,43 +101,7 @@ for d in ['alaska_road_test_202406', 'hawaii_road_test_202408', 'la_to_omaha_roa
 "
 ```
 
----
-
-## Prerequisites
-
-Python: >= 3.12
-
-Install the required Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Repository Structure & Usage
-
-- `**datasets/**`
-Contains the measurement data collected from road tests across multiple locations:
-  - `alaska_road_test_202406/` — Alaska road test data (June 2024)
-  - `hawaii_road_test_202408/` — Hawaii road test data (August 2024)
-  - `la_to_omaha_road_test_202411/` — LA to Omaha road test data (November 2024)
-  After extracting the `*.processed.tar.gz` archives, each campaign directory contains released data under `processed/`. The folder set varies by campaign:
-  - `processed/throughput/` — TCP downlink/uplink throughput summaries by operator and access network.
-  - `processed/starlink/` — Starlink-specific network KPI summaries.
-  - `processed/bs_dist_rsrp/` — Cellular base station distance and RSRP summaries.
-  - `processed/ping/` — ICMP RTT summaries for Alaska and Hawaii.
-  - `processed/latency/` — ICMP RTT summaries for the LA-to-Omaha campaign.
-  - `processed/xcal/` — XCAL-derived cellular throughput summaries for Alaska and Hawaii.
-  - `processed/mptcp/` — Operator-pair traces used for MPTCP opportunity analysis in Alaska and Hawaii.
-  - `processed/mpshell/` — Alaska and Hawaii MPShell fused traces and derived emulation summaries:
-    - `raw_traces/` — Fused single-link trace inputs.
-    - `emulation_results/` — Derived single-link, MPTCP, sum, max, and delta summaries for the emulation figures.
-  - `processed/throughput_bbr/` and `processed/throughput_cubic/` — Alaska throughput summaries split by congestion control.
-
----
-
-### Per-Campaign Subdirectory Breakdown
+### Dataset Details
 
 **Alaska (Jun 2024)** — 76 files, 234 MB
 
@@ -169,7 +139,7 @@ Contains the measurement data collected from road tests across multiple location
 | Subdir          | Size   | Sample Interval | Notes                                                                                    |
 | --------------- | ------ | --------------- | ---------------------------------------------------------------------------------------- |
 | `bs_dist_rsrp/` | 137 MB | N/A             | Single largest CSV in the release                                                        |
-| `throughput/`   | 97 MB  | 500 ms          | Both `<op>_tcp_*.csv` (iperf3 summaries) and `xcal_smart_tput.`* (XCAL-derived) variants |
+| `throughput/`   | 97 MB  | 500 ms          | Both `<op>_tcp_*.csv` (iperf3 summaries) and `xcal_smart_tput.*` (XCAL-derived) variants |
 | `starlink/`     | 33 MB  | 500 ms          | Starlink gRPC KPIs                                                                       |
 | `latency/`      | 17 MB  | 200 ms          | ICMP RTT for all four operators                                                          |
 
@@ -339,10 +309,63 @@ Aggregated MPShell emulator output, one row per run.
 | `mptcp-max/` | `location`, `operator1`, `operator2`, `run_id`, `avg_mptcp_minus_max` (MPTCP gain over best-link)     |
 | `sum-mptcp/` | `location`, `operator1`, `operator2`, `run_id`, `avg_tput` (sum minus MPTCP, i.e. MPTCP inefficiency) |
 
+---
+
+## Repository Structure
+
+- **`datasets/`**
+  Contains the measurement data collected from road tests across multiple locations:
+  - `alaska_road_test_202406/` — Alaska road test data (June 2024)
+  - `hawaii_road_test_202408/` — Hawaii road test data (August 2024)
+  - `la_to_omaha_road_test_202411/` — LA to Omaha road test data (November 2024)
+  After extracting the `*.processed.tar.gz` archives, each campaign directory contains released data under `processed/`. The folder set varies by campaign:
+  - `processed/throughput/` — TCP downlink/uplink throughput summaries by operator and access network.
+  - `processed/starlink/` — Starlink-specific network KPI summaries.
+  - `processed/bs_dist_rsrp/` — Cellular base station distance and RSRP summaries.
+  - `processed/ping/` — ICMP RTT summaries for Alaska and Hawaii.
+  - `processed/latency/` — ICMP RTT summaries for the LA-to-Omaha campaign.
+  - `processed/xcal/` — XCAL-derived cellular throughput summaries for Alaska and Hawaii.
+  - `processed/mptcp/` — Operator-pair traces used for MPTCP opportunity analysis in Alaska and Hawaii.
+  - `processed/mpshell/` — Alaska and Hawaii MPShell fused traces and derived emulation summaries:
+    - `raw_traces/` — Fused single-link trace inputs.
+    - `emulation_results/` — Derived single-link, MPTCP, sum, max, and delta summaries for the emulation figures.
+  - `processed/throughput_bbr/` and `processed/throughput_cubic/` — Alaska throughput summaries split by congestion control.
+- **`scripts/`**
+  Contains utility modules, MPShell runners, and plotting scripts:
+  - **`mpshell/`** — Scripts for running single-link/MPTCP MPShell experiments.
+  - **`plotting/`** — Scripts to generate all figures in the paper:
+    - `fig2_tput_with_cc_and_buffer/` — Throughput with congestion control and buffer
+    - `fig3_4_cell_tech_distribution/` — Cellular technology distribution for Figures 3 and 4
+    - `fig5_cell_bs_distance_rsrp/` — Cellular base station distance and RSRP
+    - `fig6_cell_kpis_across_loc/` — Cellular KPIs across locations
+    - `fig7_cell_rb_alaska/` — Cellular resource blocks in Alaska
+    - `fig8_cell_tcp_dl_with_areas/` — Cellular TCP downlink throughput CDF by area
+    - `fig9_cell_tcp_ul_with_areas/` — Cellular TCP uplink throughput CDF by area
+    - `fig10_cell_icmp_latency_with_areas/` — Cellular ICMP RTT CDF by area
+    - `fig12_starlink_network_kpis_across_locations/` — Starlink network KPIs across locations
+    - `fig13_starlink_network_kpis_with_areas/` — Starlink network KPIs by area
+    - `fig14_starlink_outage/` — Starlink outage analysis
+    - `fig15_starlink_cell_network_kpis_in_non_contiguous/` — Starlink vs Cellular in non-contiguous US
+    - `fig16_starlink_cell_network_kpis_with_areas_in_non_contiguous/` — Starlink vs Cellular by area
+    - `fig17_delta_tput_between_operators/` — Throughput delta between operators
+    - `fig18_19_mptcp_emulation/` — MPShell single-link and MPTCP performance plotting scripts
+    - `tab1_concurrent_outage/` — Analysis of concurrent outage between operators (Table 1)
 
 ---
 
-## Reproducing the Figures
+## Figure Reproduction
+
+### Prerequisites
+
+Python: >= 3.12
+
+Install the required Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Plotting
 
 ```
 cd scripts/plotting
@@ -353,9 +376,7 @@ python <fig-folder-name>/main.py
 
 Every plotting script writes its output to `scripts/plotting/<folder>/outputs/`.
 
----
-
-## Caveats
+### Caveats
 
 - **MPShell runners are not part of plotting reproduction.** `scripts/mpshell/run/*.sh` regenerate the emulator outputs and require external binaries (`mpshell`, `iperf3`) plus root privileges to tune TCP buffers. The released `processed/mpshell/emulation_results/` directories already contain the outputs consumed by Fig 18/19.
 
