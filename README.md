@@ -25,6 +25,20 @@ Our study shows a persistent digital divide between mainland and non-contiguous 
 
 ---
 
+## Research Opportunities
+
+This dataset is designed for reproducibility but is equally useful as a standalone resource for new research.
+
+**Digital divide benchmarking.** Alaska and Hawaii are among the most understudied regions in US networking research, yet they differ substantially from the mainland in terrain, population density, and operator infrastructure. This dataset provides the first publicly available, operator-concurrent 5G measurement across non-contiguous US regions with a purpose-built mainland baseline (LA → Omaha). Researchers studying coverage equity, spectrum policy, or rural broadband can use it to establish and reproduce quantitative gap estimates without conducting their own drive tests.
+
+**LEO satellite vs. cellular comparison.** Concurrent measurements of Starlink and all three major US cellular operators on identical routes — collected simultaneously — are uncommon in public datasets. The Starlink telemetry includes dish-level KPIs (obstruction fraction, outage cause and duration, SNR flags) alongside application-layer throughput, enabling deeper analysis than app-level measurement alone. This makes the dataset directly useful for researchers studying LEO satellite performance, or the viability of Starlink as a cellular complement in underserved markets.
+
+**Multipath transport emulation.** Network performance across operators in non-contiguous regions tends to be less correlated than in well-covered urban areas, creating stronger motivation and larger gains for multipath scheduling. The dataset includes pre-aligned operator-pair traces and MPShell emulation outputs, so researchers can evaluate new MPTCP scheduling algorithms or link-bonding strategies on real non-contiguous traces without re-collecting data.
+
+**ML-driven network prediction.** Fine-grained samples (200–500 ms intervals) with co-located features — throughput, RSRP, PRB counts, tech labels, GPS, weather, congestion window, and Starlink outage flags — support supervised learning tasks such as throughput prediction, handover detection, and coverage quality estimation. The distributional shift between non-contiguous and mainland US also makes this a useful testbed for evaluating model generalization across geographic domains.
+
+---
+
 ## Dataset at a Glance
 
 Three road-test campaigns covering AT&T, Verizon, T-Mobile, and Starlink. Tarballs are stored in Git LFS; once extracted, the release expands on disk to ≈ 700 MB across 211 CSV files.
